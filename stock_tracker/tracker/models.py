@@ -16,9 +16,11 @@ class Record(models.Model):
     high = models.FloatField()
     low = models.FloatField()
     open = models.FloatField()
-    date = models.DateField()  # 新增這個欄位來追蹤股價的日期
+    date = models.DateField()
+    ma5 = models.FloatField(null=True, blank=True)  # 5日均線
+    ma20 = models.FloatField(null=True, blank=True)  # 20日均線
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = ('stock', 'date')  # 確保同一支股票同一天只有一筆資料
+        unique_together = ('stock', 'date')# 確保同一支股票同一天只有一筆資料

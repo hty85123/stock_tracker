@@ -7,6 +7,7 @@ import yfinance as yf
 from .models import Stock, Record
 from django.db import IntegrityError
 from tenacity import retry, stop_after_attempt, wait_exponential
+from .technical_analysis import analyze_stock
 
 # 配置日誌
 logging.basicConfig(
@@ -57,7 +58,15 @@ def fetch_stock_data():
             try:
                 stock_data = data[stock.tickername]
                 
-                for index, row in stock_data[::-1].iterrows():
+                # 轉換成DataFrame並進行技術分析
+                df, signals = analyze_stock(stock_data)
+                
+                # 發送技術分析訊號
+                for signal in signals:
+                    logger.info(f"股票 {stock.tickername} 產生訊號: {signal}, 可串接通知軟體API推播")
+                
+                # 更新資料庫
+                for index, row in df[::-1].iterrows():
                     try:
                         Record.objects.create(
                             stock=stock,
@@ -65,7 +74,9 @@ def fetch_stock_data():
                             open=row['Open'],
                             high=row['High'],
                             low=row['Low'],
-                            close=row['Close']
+                            close=row['Close'],
+                            ma5=row['ma5'],
+                            ma20=row['ma20']
                         )
                     except IntegrityError:
                         logger.debug(f"股票 {stock.tickername} 在 {index.date()} 及之前的資料已存在")
@@ -90,11 +101,11 @@ def start():
         scheduler = BackgroundScheduler()
         scheduler.add_job(
             fetch_stock_data,
-            # 'interval',  # 改用 interval 設定
-            # minutes=1,   # 每分鐘執行一次
-            'cron',
-            hour=16,  # 設定在每天下午 4 點執行
-            minute=00,
+            #'interval',  # 改用 interval 設定
+            #minutes=1,   # 每分鐘執行一次
+             'cron',
+             hour=16,  # 設定在每天下午 4 點執行
+             minute=00,
             id='fetch_stock_data_job',
             replace_existing=True
         )
