@@ -27,3 +27,4 @@ tzlocal==5.2
 urllib3==1.26.7
 webencodings==0.5.1
 yfinance==0.2.52
+tenacity==8.2.2
