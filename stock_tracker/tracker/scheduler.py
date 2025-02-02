@@ -90,11 +90,11 @@ def start():
         scheduler = BackgroundScheduler()
         scheduler.add_job(
             fetch_stock_data,
-            'interval',  # 改用 interval 設定
-            minutes=1,   # 每分鐘執行一次
-            # 'cron',
-            # hour=16,  # 設定在每天下午 4 點執行
-            # minute=00,
+            # 'interval',  # 改用 interval 設定
+            # minutes=1,   # 每分鐘執行一次
+            'cron',
+            hour=16,  # 設定在每天下午 4 點執行
+            minute=00,
             id='fetch_stock_data_job',
             replace_existing=True
         )
